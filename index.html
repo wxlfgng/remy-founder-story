@@ -1,59 +1,83 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Remy Davenport — Founder Story (Instagram Story CTA)</title>
-<meta property="og:title" content="Remy Davenport — Founder Story (Story CTA)">
-<meta property="og:description" content="A non-Higgsfield animated 9:16 story video. DM the word FOUNDER.">
-<meta property="og:image" content="./still_F7_cta.png">
-<meta property="og:type" content="video.other">
+<title>Remy Davenport — Founder Story (tap-through Instagram Story)</title>
+<meta property="og:title" content="Remy Davenport — Founder Story (7 tap-through Story slides)">
+<meta property="og:description" content="7 animated 9:16 Story slides. Tap through. DM the word FOUNDER.">
+<meta property="og:image" content="./slides/07_cta.poster.png">
 <style>
-  :root{--bg:#0A0A0B;--fg:#F4F1EA;--mut:#8C857A;--amber:#D4A24E;--line:rgba(244,241,234,.12)}
+  :root{--bg:#0A0A0B;--fg:#F4F1EA;--mut:#8C857A;--amber:#D4A24E;--line:rgba(244,241,234,.12);--card:#121211}
   *{margin:0;box-sizing:border-box}
   body{background:var(--bg);color:var(--fg);font-family:Inter,ui-sans-serif,-apple-system,system-ui;
-    min-height:100vh;display:flex;gap:54px;align-items:center;justify-content:center;padding:48px;flex-wrap:wrap}
-  .vid{width:360px;max-width:86vw;aspect-ratio:1080/1920;border-radius:24px;overflow:hidden;background:#000;
-    box-shadow:0 30px 90px rgba(0,0,0,.65);border:1px solid var(--line)}
-  video{width:100%;height:100%;object-fit:cover;display:block}
-  .meta{max-width:460px}
+    padding:44px clamp(18px,4vw,72px);line-height:1.5}
+  header{max-width:1140px;margin:0 auto 30px}
   .ey{font-family:ui-monospace,Menlo;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--amber)}
-  h1{font-size:32px;font-weight:800;letter-spacing:-.02em;margin:12px 0 8px}
-  p{color:var(--mut);font-size:15px;line-height:1.65;margin:10px 0}
-  b{color:var(--fg)}
-  ol{color:var(--mut);font-size:14.5px;line-height:1.7;margin:14px 0 0 18px}
-  ol b{color:var(--fg)}
-  .am{color:var(--amber)}
-  .facts{font-family:ui-monospace,Menlo;font-size:12.5px;color:var(--mut);margin-top:20px;line-height:1.95}
-  .facts b{color:var(--amber)}
-  .btns{margin-top:20px;display:flex;gap:12px;flex-wrap:wrap}
-  a.btn{display:inline-block;color:var(--bg);background:var(--amber);text-decoration:none;
-    font-weight:700;font-size:14px;padding:12px 20px;border-radius:10px}
-  a.ghost{color:var(--fg);background:transparent;border:1px solid var(--line)}
+  h1{font-size:32px;font-weight:800;letter-spacing:-.02em;margin:10px 0 8px}
+  p{color:var(--mut);font-size:15px;max-width:760px}
+  p b{color:var(--fg)} .am{color:var(--amber)}
+  .wrap{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:330px 1fr;gap:40px;align-items:start}
+  @media(max-width:860px){.wrap{grid-template-columns:1fr}}
+  .reelcol h2,.gridcol h2{font-size:13px;font-family:ui-monospace,Menlo;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:14px}
+  .reel{width:100%;aspect-ratio:1080/1920;border-radius:20px;overflow:hidden;background:#000;border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.6)}
+  .reel video{width:100%;height:100%;object-fit:cover;display:block}
+  .note{font-family:ui-monospace,Menlo;font-size:12px;color:var(--mut);margin-top:12px;line-height:1.8}
+  .note b{color:var(--amber)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+  .slide{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .slide video{width:100%;aspect-ratio:1080/1920;object-fit:cover;display:block;background:#000;cursor:pointer}
+  .slide .cap{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;gap:8px}
+  .slide .n{font-family:ui-monospace,Menlo;font-size:11px;color:var(--mut)}
+  .slide .n b{color:var(--fg)}
+  .slide a{font-family:ui-monospace,Menlo;font-size:11px;color:var(--amber);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:4px 8px}
+  .steps{max-width:1140px;margin:34px auto 0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px}
+  .steps h2{font-size:13px;font-family:ui-monospace,Menlo;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+  .steps ol{margin:0 0 0 18px;color:var(--mut);font-size:14px;line-height:1.75}
+  .steps ol b{color:var(--fg)}
+  a.dl{display:inline-block;margin-top:14px;color:var(--bg);background:var(--amber);text-decoration:none;font-weight:700;font-size:13px;padding:10px 16px;border-radius:9px}
 </style></head>
 <body>
-  <div class="vid">
-    <video src="./founder-story.mp4" poster="./still_F7_cta.png" autoplay muted loop playsinline controls></video>
-  </div>
-  <div class="meta">
-    <div class="ey">Instagram Story · Call-to-action</div>
+  <header>
+    <div class="ey">Instagram Story · 7 tap-through slides · Call-to-action</div>
     <h1>Remy Davenport — Founder Story</h1>
-    <p>A fully animated <b>9:16 story video</b> (no AI footage) built to convert warm profile visitors —
-    7–9 figure founders who keep hopping from one media freelancer to the next — into DMs.</p>
-    <ol>
-      <li>Media guy #1. Then #2. Then #3.</li>
-      <li>A whole year building a media team in-house — still no end in sight.</li>
-      <li>Every new hire, the brand <b>starts over.</b></li>
-      <li>You <b>already know</b> the fix. It isn't another hire.</li>
-      <li>One specialized team that <b>owns it.</b></li>
-      <li>Off your plate. On brand. Always on.</li>
-      <li><b class="am">DM the word FOUNDER</b> — arrows to the reply bar <i>(held 20s)</i>.</li>
-    </ol>
-    <div class="facts">
-      1080×1920 · 9:16 · 60fps<br>
-      ~18.6s motion + <b>20s freeze</b> ≈ 38.6s total<br>
-      Engine A (animated UI, zero AI) · keyword <b>FOUNDER</b>
+    <p>Seven animated <b>9:16</b> Story slides for warm profile visitors (7–9 figure founders stuck hopping
+    between media freelancers). Post them in order as separate Story frames — the viewer <b>taps through</b>,
+    reading each at their own pace, and lands on <b class="am">DM the word FOUNDER</b>.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="reelcol">
+      <h2>Full sequence (preview)</h2>
+      <div class="reel"><video src="./reel.mp4" poster="./slides/01_hook.poster.png" autoplay muted loop playsinline controls></video></div>
+      <div class="note">This reel is preview only — it stitches all 7 so you can see the flow.<br>
+        <b>Upload the 7 individual slides →</b>, not the reel.</div>
     </div>
-    <div class="btns">
-      <a class="btn" href="./founder-story.mp4" download>Download MP4</a>
-      <a class="btn ghost" href="./README.md">How to post</a>
+
+    <div class="gridcol">
+      <h2>The 7 slides — upload these</h2>
+      <div class="grid" id="grid"></div>
     </div>
   </div>
+
+  <div class="steps">
+    <h2>How to post</h2>
+    <ol>
+      <li>Download all <b>7 slide MP4s</b> (in order, 01 → 07).</li>
+      <li>Add them to Remy's <b>Story</b> as <b>7 separate frames</b>, in order.</li>
+      <li>Each slide animates, then holds — viewers <b>tap to advance</b> when they've read it.</li>
+      <li>The last slide (<b class="am">FOUNDER</b>) holds ~12s with the arrows pointing at the reply bar.</li>
+      <li>Keyword is <b>FOUNDER</b> — story replies arrive as DMs. (Optional: keyword auto-responder.)</li>
+    </ol>
+    <a class="dl" href="./slides/" >Browse all slide files</a>
+  </div>
+
+<script>
+  const S=[['01_hook','Hook'],['02_year','The year'],['03_cost','The cost'],['04_know','You know'],
+           ['05_answer','The answer'],['06_relief','The relief'],['07_cta','CTA · FOUNDER']];
+  document.getElementById('grid').innerHTML=S.map(([id,label],i)=>`
+    <div class="slide">
+      <video src="./slides/${id}.mp4" poster="./slides/${id}.poster.png" muted loop playsinline
+        onmouseenter="this.play()" onmouseleave="this.pause()" onclick="this.paused?this.play():this.pause()"></video>
+      <div class="cap"><span class="n"><b>${String(i+1).padStart(2,'0')}</b> ${label}</span>
+        <a href="./slides/${id}.mp4" download>get</a></div>
+    </div>`).join('');
+</script>
 </body></html>

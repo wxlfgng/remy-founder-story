@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 /**
- * Remy Davenport — Founder Story (CTA) — story-format build (1080×1920).
+ * Remy Davenport — Founder Story — TAP-THROUGH Story slides (1080×1920).
  *
- * Self-contained (does NOT modify the shared engine core, which is locked to 1080×1350).
- * Reuses the proven Engine-A approach: motion is a pure function of progress t, driven via
- * window.__seekSlide(0,t); each frame screenshotted via CDP, ffmpeg-encoded, then the FINAL
- * frame is frozen for exactly 20s (house protocol).
+ * Produces 7 STANDALONE slide videos (one per beat) to upload as separate Instagram Story frames;
+ * the viewer taps to advance and reads each at their own pace. Slides 1-6 animate a smooth reveal
+ * then FREEZE-HOLD for reading (house protocol, per slide); the CTA renders live so its arrows keep
+ * marching toward the reply bar. Also stitches a preview reel.mp4 of the whole sequence.
  *
- * Modes:
- *   node build.mjs                       full render (60fps, retina 2x) -> founder-story.mp4 + stills
- *   node build.mjs --fps 60 --scale 2    override
- *   node build.mjs --check               FAST layout proof: one settled still per frame (scale 1), no video
+ * Self-contained — does NOT touch the shared engine core (locked to 1080×1350). Motion is a pure
+ * function of t via window.__seekSlide(i,t); each slide screenshotted via CDP, ffmpeg-encoded.
+ *
+ *   node build.mjs --fps 60 --scale 1     full render -> out/slides/*.mp4 + out/reel.mp4
+ *   node build.mjs --check                FAST: one settled still per slide (scale 1), no video
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, cpSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,69 +24,51 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) => {
   return a;
 }, []));
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ENGINE = path.resolve(HERE, '../../');                 // _video-engine/
+const ENGINE = path.resolve(HERE, '../../');
 const TPL = path.join(HERE, 'template.html');
-const HTML = path.join(HERE, 'index.html');                  // assembled (fonts inlined)
+const HTML = path.join(HERE, 'index.html');
 const OUT = path.join(HERE, 'out');
+const SLIDES_DIR = path.join(OUT, 'slides');
 const CHECK = !!args.check;
 const FPS = parseInt(args.fps || (CHECK ? '1' : '60'), 10);
-const SCALE = parseInt(args.scale || (CHECK ? '1' : '2'), 10);
-const HOLD = parseFloat(args.hold || '20');                  // freeze seconds on final frame
+const SCALE = parseInt(args.scale || (CHECK ? '1' : '1'), 10);
 const W = 1080, H = 1920;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const FFMPEG = spawnSync('which', ['ffmpeg']).stdout?.toString().trim() || 'ffmpeg';
+const FFPROBE = FFMPEG.replace(/ffmpeg$/, 'ffprobe');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const X264 = ['-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
 
-// ---- assemble: inline fonts-embed.css into the <!--FONTS--> marker ----
 function assemble() {
   const fonts = readFileSync(path.join(ENGINE, 'fonts-embed.css'), 'utf8');
-  const html = readFileSync(TPL, 'utf8').replace('<!--FONTS-->', fonts);
-  writeFileSync(HTML, html);
-  console.log(`✓ assembled ${(html.length / 1024).toFixed(0)}KB -> index.html`);
+  writeFileSync(HTML, readFileSync(TPL, 'utf8').replace('<!--FONTS-->', fonts));
+  console.log('✓ assembled index.html');
 }
-
-// ---- minimal CDP client over the built-in WebSocket ----
 class CDP {
   constructor(ws) { this.ws = ws; this.id = 0; this.waiters = new Map(); }
   static async attach(wsUrl) {
-    const ws = new WebSocket(wsUrl);
-    await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
-    const c = new CDP(ws);
-    ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && c.waiters.has(m.id)) { c.waiters.get(m.id)(m); c.waiters.delete(m.id); } };
-    return c;
+    const ws = new WebSocket(wsUrl); await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
+    const c = new CDP(ws); ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && c.waiters.has(m.id)) { c.waiters.get(m.id)(m); c.waiters.delete(m.id); } }; return c;
   }
-  send(method, params = {}) {
-    const id = ++this.id;
-    return new Promise((res, rej) => { this.waiters.set(id, (m) => (m.error ? rej(new Error(method + ': ' + m.error.message)) : res(m.result))); this.ws.send(JSON.stringify({ id, method, params })); });
-  }
-  async evalJS(expression) {
-    const r = await this.send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
-    if (r.exceptionDetails) throw new Error('eval: ' + (r.exceptionDetails.exception?.description || r.exceptionDetails.text));
-    return r.result.value;
-  }
+  send(method, params = {}) { const id = ++this.id; return new Promise((res, rej) => { this.waiters.set(id, (m) => (m.error ? rej(new Error(method + ': ' + m.error.message)) : res(m.result))); this.ws.send(JSON.stringify({ id, method, params })); }); }
+  async evalJS(e) { const r = await this.send('Runtime.evaluate', { expression: e, returnByValue: true, awaitPromise: true }); if (r.exceptionDetails) throw new Error('eval: ' + (r.exceptionDetails.exception?.description || r.exceptionDetails.text)); return r.result.value; }
 }
 async function launchChrome() {
-  const profile = path.join(tmpdir(), 'remy-' + process.pid);
-  const port = 9400 + (process.pid % 400);
+  const profile = path.join(tmpdir(), 'remy-' + process.pid), port = 9400 + (process.pid % 400);
   const proc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`,
-    '--hide-scrollbars', '--no-first-run', '--no-default-browser-check', '--disable-gpu',
-    '--force-color-profile=srgb', `--window-size=${W},${H}`], { stdio: 'ignore' });
+    '--hide-scrollbars', '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--force-color-profile=srgb', `--window-size=${W},${H}`], { stdio: 'ignore' });
   let wsUrl;
-  for (let i = 0; i < 120; i++) {
-    try { const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
-      const page = list.find((t) => t.type === 'page');
-      if (page?.webSocketDebuggerUrl) { wsUrl = page.webSocketDebuggerUrl; break; } } catch {}
-    await sleep(100);
-  }
+  for (let i = 0; i < 120; i++) { try { const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json(); const page = list.find((t) => t.type === 'page'); if (page?.webSocketDebuggerUrl) { wsUrl = page.webSocketDebuggerUrl; break; } } catch {} await sleep(100); }
   if (!wsUrl) throw new Error('Chrome devtools endpoint never came up');
   return { proc, wsUrl, profile };
 }
-function enc(a) { return spawnSync(FFMPEG, a, { stdio: 'ignore' }); }
+const enc = (a) => spawnSync(FFMPEG, a, { stdio: 'ignore' });
 
 async function main() {
   assemble();
-  rmSync(OUT, { recursive: true, force: true });
-  mkdirSync(OUT, { recursive: true });
+  const RESUME = !!args.resume;
+  if (!RESUME) rmSync(OUT, { recursive: true, force: true });
+  mkdirSync(SLIDES_DIR, { recursive: true });
   const { proc, wsUrl, profile } = await launchChrome();
   try {
     const cdp = await CDP.attach(wsUrl);
@@ -94,58 +77,54 @@ async function main() {
     await cdp.send('Page.navigate', { url: 'file://' + HTML });
     for (let i = 0; i < 250; i++) { const r = await cdp.evalJS('!!window.__ready').catch(() => false); if (r) break; await sleep(100); }
     const slides = await cdp.evalJS('JSON.stringify(window.__slides)').then(JSON.parse);
-    const dur = slides[0].dur;
-    const shot = async (t) => (await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false })).data;
+    const shot = async () => (await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false })).data;
 
     if (CHECK) {
-      // one settled still per frame window (mid-reveal, pre-exit)
-      const TS = [2.0, 4.5, 7.0, 9.5, 12.0, 14.4, 18.2];
-      for (let k = 0; k < TS.length; k++) {
-        await cdp.evalJS(`window.__seekSlide(0, ${(TS[k] / dur).toFixed(5)})`);
-        const data = await shot();
-        writeFileSync(path.join(OUT, `check_F${k + 1}.png`), Buffer.from(data, 'base64'));
-        process.stdout.write(`·F${k + 1}`);
+      for (let i = 0; i < slides.length; i++) {
+        await cdp.evalJS(`window.__seekSlide(${i}, 0.86)`);
+        writeFileSync(path.join(OUT, `check_${slides[i].id}.png`), Buffer.from(await shot(), 'base64'));
+        process.stdout.write(`·${slides[i].id}`);
       }
-      console.log(`\n✓ check stills -> ${OUT}`);
-      return;
+      console.log(`\n✓ check stills -> ${OUT}`); return;
     }
 
-    // ---- full render ----
-    const framesDir = path.join(OUT, '_frames'); mkdirSync(framesDir, { recursive: true });
-    const nFrames = Math.round(FPS * dur);
-    console.log(`▸ rendering ${nFrames} frames @ ${FPS}fps retina ${SCALE}x (${dur}s motion)`);
-    const t0 = Date.now();
-    for (let f = 0; f < nFrames; f++) {
-      const t = f / (nFrames - 1);
-      await cdp.evalJS(`window.__seekSlide(0, ${t.toFixed(6)})`);
-      const data = await shot();
-      writeFileSync(path.join(framesDir, String(f).padStart(4, '0') + '.png'), Buffer.from(data, 'base64'));
-      if (f % 60 === 0) process.stdout.write(`  ${f}/${nFrames} (${((Date.now() - t0) / 1000).toFixed(0)}s)\n`);
+    const made = [];
+    for (let i = 0; i < slides.length; i++) {
+      const s = slides[i];
+      const final = path.join(SLIDES_DIR, `${s.id}.mp4`);
+      if (RESUME && existsSync(final)) { console.log(`▸ ${s.id} — exists, skip`); made.push({ id: s.id, len: s.live ? s.dur : s.hold, live: !!s.live }); continue; }
+      const nFrames = Math.max(2, Math.round(FPS * s.dur));
+      const fdir = path.join(OUT, '_frames'); rmSync(fdir, { recursive: true, force: true }); mkdirSync(fdir, { recursive: true });
+      process.stdout.write(`▸ slide ${i + 1}/${slides.length} ${s.id} — ${nFrames}f`);
+      for (let f = 0; f < nFrames; f++) {
+        await cdp.evalJS(`window.__seekSlide(${i}, ${(f / (nFrames - 1)).toFixed(6)})`);
+        writeFileSync(path.join(fdir, String(f).padStart(4, '0') + '.png'), Buffer.from(await shot(), 'base64'));
+      }
+      const tmp = path.join(OUT, '_tmp.mp4');
+      enc(['-y', '-framerate', String(FPS), '-i', path.join(fdir, '%04d.png'), '-vf', `scale=${W}:${H}:flags=lanczos`, ...X264, tmp]);
+      if (!s.live && s.hold > s.dur) {
+        enc(['-y', '-i', tmp, '-vf', `tpad=stop_mode=clone:stop_duration=${(s.hold - s.dur).toFixed(2)},fps=${FPS}`, ...X264, final]);
+        rmSync(tmp, { force: true });
+      } else { spawnSync('mv', [tmp, final]); }
+      // poster = settled last rendered frame
+      enc(['-y', '-i', path.join(fdir, String(nFrames - 1).padStart(4, '0') + '.png'), '-vf', `scale=${W}:${H}:flags=lanczos`, path.join(SLIDES_DIR, `${s.id}.poster.png`)]);
+      const sz = existsSync(final) ? (readFileSync(final).length / 1024 / 1024).toFixed(2) + 'MB' : 'FAIL';
+      console.log(` -> ${s.id}.mp4 (${(s.live ? s.dur : s.hold)}s, ${sz})`);
+      made.push({ id: s.id, len: s.live ? s.dur : s.hold, live: !!s.live });
+      rmSync(fdir, { recursive: true, force: true });
     }
-    const motion = path.join(OUT, '_motion.mp4');
-    const finalMp4 = path.join(OUT, 'founder-story.mp4');
-    console.log('  encoding motion…');
-    enc(['-y', '-framerate', String(FPS), '-i', path.join(framesDir, '%04d.png'),
-      '-vf', `scale=${W}:${H}:flags=lanczos`, '-c:v', 'libx264', '-preset', 'slow', '-crf', '18',
-      '-pix_fmt', 'yuv420p', '-movflags', '+faststart', motion]);
-    console.log(`  freezing final frame +${HOLD}s…`);
-    enc(['-y', '-i', motion, '-vf', `tpad=stop_mode=clone:stop_duration=${HOLD},fps=${FPS}`,
-      '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', finalMp4]);
-    // stills from the final mp4: F1 / F5 / the held CTA
-    const stills = [['still_F1_hook.png', '1.6'], ['still_F5_answer.png', '12.0'], ['still_F7_cta.png', String((dur + 1).toFixed(1))]];
-    for (const [name, ts] of stills) enc(['-y', '-ss', ts, '-i', finalMp4, '-frames:v', '1', path.join(OUT, name)]);
-    rmSync(framesDir, { recursive: true, force: true });
 
-    // probe final
-    const probe = spawnSync(FFMPEG.replace(/ffmpeg$/, 'ffprobe'), ['-v', 'error', '-select_streams', 'v:0',
-      '-show_entries', 'stream=width,height,r_frame_rate,nb_frames', '-show_entries', 'format=duration',
-      '-of', 'default=noprint_wrappers=1', finalMp4]).stdout?.toString().trim();
-    const sz = existsSync(finalMp4) ? (readFileSync(finalMp4).length / 1024 / 1024).toFixed(1) + 'MB' : 'FAIL';
-    writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify({ w: W, h: H, fps: FPS, motionSec: dur, holdSec: HOLD, file: 'founder-story.mp4' }, null, 2));
-    console.log(`\n✓ founder-story.mp4 (${sz})\n${probe}`);
+    // preview reel = all slides in order (re-encoded for a clean concat)
+    const listFile = path.join(OUT, '_concat.txt');
+    writeFileSync(listFile, made.map((m) => `file '${path.join(SLIDES_DIR, m.id + '.mp4')}'`).join('\n'));
+    enc(['-y', '-f', 'concat', '-safe', '0', '-i', listFile, '-vf', `scale=${W}:${H}:flags=lanczos`, ...X264, path.join(OUT, 'reel.mp4')]);
+    rmSync(listFile, { force: true });
+
+    const total = made.reduce((a, m) => a + m.len, 0);
+    writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify({ w: W, h: H, fps: FPS, slides: made, reelSec: +total.toFixed(1) }, null, 2));
+    console.log(`\n✓ ${made.length} slides + reel.mp4 (${total.toFixed(1)}s) -> ${SLIDES_DIR}`);
   } finally {
-    proc.kill('SIGKILL');
-    await sleep(300);
+    proc.kill('SIGKILL'); await sleep(300);
     try { rmSync(profile, { recursive: true, force: true }); } catch {}
   }
 }
