@@ -38,7 +38,7 @@ html,body{background:#FFFFFF}
 /* ---------- frame band (story-safe) ---------- */
 #band{position:absolute;left:0;right:0;top:250px;bottom:316px;z-index:4;
   display:block;padding:0 100px 0 150px}
-.frame{position:absolute;inset:0;padding:0 100px 0 150px;display:none;flex-direction:column;
+.frame{position:absolute;inset:0;padding:0 64px 0 150px;display:none;flex-direction:column;
   align-items:flex-start;justify-content:center;will-change:transform,opacity}
 .frame.on{display:flex}
 
@@ -46,21 +46,21 @@ html,body{background:#FFFFFF}
   color:var(--amber);font-weight:500;margin-bottom:40px;display:flex;align-items:center;gap:18px}
 .eye .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 14px var(--glow)}
 
-h1{font-family:var(--sans);font-weight:800;line-height:1.07;letter-spacing:-.035em;font-size:80px;color:var(--bone)}
+h1{font-family:var(--sans);font-weight:800;line-height:1.07;letter-spacing:-.038em;font-size:98px;color:var(--bone)}
 h1 .ln{display:block}
 .am{color:var(--amber)}
-.sub{font-family:var(--sans);font-weight:450;font-size:42px;line-height:1.32;color:var(--mut);
+.sub{font-family:var(--sans);font-weight:450;font-size:46px;line-height:1.32;color:var(--mut);
   margin-top:46px;max-width:840px}
 .sub b{color:var(--bone);font-weight:600}
 em.it{font-style:italic;font-family:var(--serif);font-weight:500}
 
 /* F1 stacked lines */
-.stak .ln{display:block;font-family:var(--sans);font-weight:800;font-size:94px;line-height:1.12;
-  letter-spacing:-.035em;color:var(--bone)}
+.stak .ln{display:block;font-family:var(--sans);font-weight:800;font-size:116px;line-height:1.1;
+  letter-spacing:-.04em;color:var(--bone)}
 .stak .ln .num{color:var(--amber)}
 
 /* F3 cost verbs */
-.beat{font-family:var(--sans);font-weight:700;font-size:56px;line-height:1.2;color:var(--mut);margin-top:34px}
+.beat{font-family:var(--sans);font-weight:700;font-size:60px;line-height:1.2;color:var(--mut);margin-top:34px}
 .beat .v{color:var(--amber2)}
 
 /* F5 pillars */
@@ -73,7 +73,7 @@ em.it{font-style:italic;font-family:var(--serif);font-weight:500}
 /* F6 relief lines */
 .relief{display:flex;flex-direction:column;gap:30px}
 .relief .rl{display:flex;align-items:center;gap:28px;font-family:var(--sans);font-weight:800;
-  font-size:84px;letter-spacing:-.03em;color:var(--bone)}
+  font-size:98px;letter-spacing:-.03em;color:var(--bone)}
 .relief .rl .ck{flex:0 0 auto;width:56px;height:56px;border-radius:50%;border:2px solid var(--amber);
   display:grid;place-items:center;color:var(--amber);font-size:30px;font-weight:700}
 
@@ -134,14 +134,14 @@ em.it{font-style:italic;font-family:var(--serif);font-weight:500}
     <!-- F4 THE TURN -->
     <section class="frame" data-f="3">
       <div class="eye"><span class="dot"></span>Deep down</div>
-      <h1 data-c><span class="ln">You <em class="it am">already know</em></span><span class="ln">the fix.</span></h1>
+      <h1 data-c><span class="ln">You <em class="it am">already</em></span><span class="ln"><em class="it am">know</em> the fix.</span></h1>
       <p class="sub" data-c>And it <b>isn't</b> another hire.</p>
     </section>
 
     <!-- F5 THE ANSWER -->
     <section class="frame" data-f="4">
       <div class="eye"><span class="dot"></span>The answer</div>
-      <h1 data-c><span class="ln">One specialized</span><span class="ln">team that <span class="am">owns it.</span></span></h1>
+      <h1 data-c><span class="ln">One specialized</span><span class="ln">team that</span><span class="ln"><span class="am">owns it.</span></span></h1>
       <div class="pillars">
         <span class="pchip" data-p><span class="t"></span>Strategy</span>
         <span class="pchip" data-p><span class="t"></span>Production</span>
@@ -207,100 +207,57 @@ const WIN0=[0,1,9e9,9e9];   // zero-based window: reveal near the start, never e
 
 const frames=[...document.querySelectorAll('.frame'),document.querySelector('.cta')];
 
-/* child reveal: mask-wipe + rise + micro-scale, all eased */
-function reveal(el,p,dy=34){
-  if(!el)return; const e=eOutQuint(p), o=eOutCubic(p);
-  el.style.opacity=o.toFixed(4);
-  el.style.transform=`translateY(${lerp(dy,0,e).toFixed(2)}px) scale(${lerp(.97,1,e).toFixed(4)})`;
-  el.style.clipPath=`inset(0 0 ${((1-e)*102).toFixed(1)}% 0)`;
-}
-function fadeRise(el,p,dy=26){ if(!el)return; const e=eOutExpo(p);
-  el.style.opacity=eOutCubic(p).toFixed(4); el.style.transform=`translateY(${lerp(dy,0,e).toFixed(2)}px)`; }
+/* ===== elegant reveal primitives — each a PURE function of progress p∈[0,1] ===== */
+function fadeRise(el,p,dy=26){ if(!el)return; const e=eOutExpo(p); el.style.opacity=eOutCubic(p).toFixed(4); el.style.transform=`translateY(${lerp(dy,0,e).toFixed(2)}px)`; }
+function rvDrop(el,p,dy=92){ if(!el)return; const e=eOutBack(p); el.style.opacity=eOutCubic(clamp(p*1.5,0,1)).toFixed(4); el.style.transform=`translateY(${lerp(-dy,0,e).toFixed(2)}px)`; }              // 1 drop from above (overshoot)
+function rvWipe(el,p){ if(!el)return; const e=eOutExpo(p); el.style.opacity=p>0.001?'1':'0'; el.style.clipPath=`inset(-9% ${((1-e)*100).toFixed(1)}% -9% 0)`; el.style.transform='none'; }                  // 2 curtain wipe left->right
+function rvZoom(el,p){ if(!el)return; const e=eOutExpo(p); el.style.transformOrigin='left center'; el.style.opacity=eOutCubic(p).toFixed(4); el.style.transform=`scale(${lerp(1.16,1,e).toFixed(4)})`; }       // 3 zoom-settle from larger
+function rvFocus(el,p){ if(!el)return; const e=eOutCubic(p); el.style.opacity=e.toFixed(4); el.style.filter=`blur(${lerp(16,0,eOutExpo(p)).toFixed(2)}px)`; el.style.transform=`scale(${lerp(1.05,1,e).toFixed(4)})`; }  // 4 focus pull (blur in)
+function rvFlip(el,p){ if(!el)return; const e=eOutExpo(p); el.style.transformOrigin='center bottom'; el.style.opacity=eOutCubic(clamp(p*1.3,0,1)).toFixed(4); el.style.transform=`perspective(1200px) rotateX(${lerp(46,0,e).toFixed(2)}deg) translateY(${lerp(30,0,e).toFixed(2)}px)`; }  // 5 flip up
+function rvSlideL(el,p,dx=84){ if(!el)return; const e=eOutExpo(p); el.style.opacity=eOutCubic(p).toFixed(4); el.style.transform=`translateX(${lerp(-dx,0,e).toFixed(2)}px)`; }                                  // 6 slide from left
+function eyeIn(s,p){ const el=s.querySelector('.eye'); if(!el)return; const e=eOutExpo(p); el.style.opacity=eOutCubic(p).toFixed(3); el.style.transform=`translateX(${lerp(-20,0,e).toFixed(1)}px)`; }
+const stg=(sec,a,d,k,gap)=>seg(sec,a+k*gap,a+k*gap+d);
 
-/* group exit envelope for a frame container */
-function envelope(el,sec,w){
-  const enter=seg(sec,w[0],w[1]);
-  const exit=seg(sec,w[2],w[3]);
-  const vis=sec>=w[0]-0.25 && sec<=w[3]+0.25;   // run inner choreography only near the window
-  el.classList.add('on');                        // ALWAYS in render tree — no display:none flip (avoids capture paint race)
-  const ex=eInCubic(exit);
-  el.style.opacity=(vis?(1-ex):0).toFixed(4);    // cull outside the window via opacity, not display
-  el.style.transform=`translateY(${lerp(0,-62,ex).toFixed(2)}px)`;
-  return {enter,exit,vis};
-}
-
-/* ---- per-frame inner choreography (staggered children) ---- */
+/* ---- distinct per-slide choreography — every beat has its own signature motion ---- */
 const ANIM=[
-  // F1 — three lines drop in with rhythm
-  (s,sec,w)=>{ const ls=[...s.querySelectorAll('[data-c]')];
-    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.10+k*0.20, w[0]+0.10+k*0.20+0.62), 40));
-    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
-  },
-  // F2 — headline lines wipe, sub rises
-  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
-    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
-    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.18+k*0.16, w[0]+0.18+k*0.16+0.66), 38));
-    fadeRise(s.querySelector('.sub'), seg(sec, w[0]+0.78, w[0]+1.25), 22);
-  },
-  // F3 — cost: headline then verbs punch
-  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
-    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
-    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.16+k*0.18, w[0]+0.16+k*0.18+0.66), 38));
-    fadeRise(s.querySelector('.beat'), seg(sec, w[0]+0.82, w[0]+1.28), 20);
-  },
-  // F4 — the turn (serif emphasis)
-  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
-    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
-    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.20+k*0.22, w[0]+0.20+k*0.22+0.7), 40));
-    fadeRise(s.querySelector('.sub'), seg(sec, w[0]+0.92, w[0]+1.4), 22);
-  },
-  // F5 — answer + pillar chips pop staggered
-  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
-    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
-    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.16+k*0.18, w[0]+0.16+k*0.18+0.66), 38));
-    [...s.querySelectorAll('[data-p]')].forEach((c,k)=>{
-      const p=eOutBack(seg(sec, w[0]+0.78+k*0.14, w[0]+1.18+k*0.14));
-      c.style.opacity=clamp(p,0,1).toFixed(3);
-      c.style.transform=`translateY(${lerp(24,0,clamp(p,0,1)).toFixed(2)}px) scale(${lerp(.9,1,clamp(p,0,1)).toFixed(3)})`;
-    });
-  },
-  // F6 — relief lines + check marks land
-  (s,sec,w)=>{ reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
-    [...s.querySelectorAll('[data-r]')].forEach((l,k)=>{
-      const a=w[0]+0.18+k*0.30;
-      reveal(l, seg(sec, a, a+0.64), 36);
-      const ck=l.querySelector('.ck'); const cp=eOutBack(seg(sec, a+0.18, a+0.66));
-      ck.style.transform=`scale(${lerp(.4,1,clamp(cp,0,1)).toFixed(3)})`; ck.style.opacity=clamp(cp,0,1).toFixed(3);
-    });
-  },
-  // F7 — CTA: eyebrow, lead, pill pop, arrows draw, reply; then loop glow+march
-  (s,sec,w)=>{
-    reveal(s.querySelector('.eye'), seg(sec, w[0], w[0]+0.5),18);
-    fadeRise(s.querySelector('.lead'), seg(sec, w[0]+0.25, w[0]+0.8),22);
-    const pill=s.querySelector('#pill'); const pp=eOutBack(seg(sec, w[0]+0.5, w[0]+1.15));
-    pill.style.opacity=clamp(pp,0,1).toFixed(3);
-    pill.style.transform=`scale(${lerp(.78,1,clamp(pp,0,1)).toFixed(4)})`;
-    // continuous glow pulse (text stays full opacity — freeze-safe)
-    const settled=seg(sec, w[0]+0.5, w[0]+1.15);
-    const pulse=(Math.sin(sec*TAU/2.2)*0.5+0.5);
-    const gl=lerp(14,46,pulse)*settled;
+  // F1 HOOK — lines DROP from above with overshoot; the numbers pop
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    [...s.querySelectorAll('.stak [data-c]')].forEach((l,k)=>rvDrop(l, stg(sec,0.12,0.6,k,0.20), 96));
+    s.querySelectorAll('.stak .num').forEach((n,k)=>{ const p=clamp(eOutBack(stg(sec,0.32,0.36,k,0.20)),0,1); n.style.display='inline-block'; n.style.transform=`scale(${lerp(.5,1,p).toFixed(3)})`; }); },
+  // F2 STRUGGLE — each line WIPES open left->right (curtain)
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    [...s.querySelectorAll('h1 .ln')].forEach((l,k)=>rvWipe(l, stg(sec,0.15,0.62,k,0.17)));
+    fadeRise(s.querySelector('.sub'), seg(sec,0.9,1.34),22); },
+  // F3 COST — lines ZOOM-settle from larger; verbs punch in
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    [...s.querySelectorAll('h1 .ln')].forEach((l,k)=>rvZoom(l, stg(sec,0.12,0.56,k,0.15)));
+    fadeRise(s.querySelector('.beat'), seg(sec,0.86,1.32),20); },
+  // F4 THE TURN — FOCUS PULL: text resolves from blur (serif emphasis)
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    [...s.querySelectorAll('h1 .ln')].forEach((l,k)=>rvFocus(l, stg(sec,0.16,0.74,k,0.22)));
+    fadeRise(s.querySelector('.sub'), seg(sec,1.0,1.44),22); },
+  // F5 ANSWER — lines FLIP up off the baseline (3D); chips pop
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    [...s.querySelectorAll('h1 .ln')].forEach((l,k)=>rvFlip(l, stg(sec,0.13,0.6,k,0.15)));
+    [...s.querySelectorAll('[data-p]')].forEach((c,k)=>{ const p=clamp(eOutBack(stg(sec,0.86,0.42,k,0.14)),0,1); c.style.opacity=p.toFixed(3); c.style.transform=`translateY(${lerp(22,0,p).toFixed(2)}px) scale(${lerp(.9,1,p).toFixed(3)})`; }); },
+  // F6 RELIEF — lines SLIDE in from the left; checks spring in
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    [...s.querySelectorAll('[data-r]')].forEach((l,k)=>{ const a=0.16+k*0.26; rvSlideL(l, seg(sec,a,a+0.62), 92);
+      const ck=l.querySelector('.ck'); const cp=clamp(eOutBack(seg(sec,a+0.22,a+0.68)),0,1); ck.style.transform=`scale(${lerp(.3,1,cp).toFixed(3)})`; ck.style.opacity=cp.toFixed(3); }); },
+  // F7 CTA — keyword POPS with a letter-spacing settle + glow; arrows march (live loop)
+  (s,sec)=>{ eyeIn(s,seg(sec,0,0.5));
+    fadeRise(s.querySelector('.lead'), seg(sec,0.25,0.82),22);
+    const pill=s.querySelector('#pill'); const pin=seg(sec,0.5,1.18); const pe=clamp(eOutBack(pin),0,1);
+    pill.style.opacity=clamp(pin*1.6,0,1).toFixed(3);
+    pill.style.transform=`scale(${lerp(.72,1,pe).toFixed(4)})`;
+    pill.style.letterSpacing=`${lerp(0.2,0.02,eOutExpo(pin)).toFixed(3)}em`;
+    const pulse=(Math.sin(sec*TAU/2.2)*0.5+0.5); const gl=lerp(16,54,pulse)*pin;
     pill.style.boxShadow=`0 0 ${gl.toFixed(0)}px ${(gl*0.9).toFixed(0)}px rgba(124,58,237,${(0.22+0.18*pulse).toFixed(3)})`;
-    // arrows: draw in staggered, then a downward travelling highlight + gentle bob
-    const chevs=[...s.querySelectorAll('[data-ch]')];
-    chevs.forEach((c,k)=>{
-      const dl=eOutCubic(seg(sec, w[0]+0.85+k*0.13, w[0]+1.25+k*0.13));
-      const L=c.getTotalLength(); c.style.strokeDasharray=L;
-      c.style.strokeDashoffset=(L*(1-dl)).toFixed(1);
-      // travelling brightness wave down the stack (loops)
-      const phase=(sec*1.05 - k*0.32)%1.6/1.6;
-      const wave=Math.max(0,Math.cos((phase-0.5)*Math.PI));
-      c.style.opacity=(clamp(dl,0,1)*lerp(0.5,1,wave)).toFixed(3);
-      c.style.strokeWidth=lerp(11,15,wave).toFixed(1);
-    });
-    const arr=s.querySelector('.arrows');
-    arr.style.transform=`translateY(${(Math.sin(sec*TAU/1.9)*7).toFixed(2)}px)`;
-    fadeRise(s.querySelector('.reply'), seg(sec, w[0]+1.05, w[0]+1.6),18);
-  },
+    [...s.querySelectorAll('[data-ch]')].forEach((c,k)=>{ const dl=clamp(eOutCubic(stg(sec,0.85,0.4,k,0.13)),0,1); const L=c.getTotalLength(); c.style.strokeDasharray=L; c.style.strokeDashoffset=(L*(1-dl)).toFixed(1);
+      const phase=(sec*1.05-k*0.32)%1.6/1.6; const wave=Math.max(0,Math.cos((phase-0.5)*Math.PI));
+      c.style.opacity=(dl*lerp(0.45,1,wave)).toFixed(3); c.style.strokeWidth=lerp(11,15,wave).toFixed(1); });
+    s.querySelector('.arrows').style.transform=`translateY(${(Math.sin(sec*TAU/1.9)*8).toFixed(2)}px)`;
+    fadeRise(s.querySelector('.reply'), seg(sec,1.05,1.62),18); },
 ];
 
 /* ---------- persistent background drift (continuous, never resets) ---------- */
