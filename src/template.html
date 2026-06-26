@@ -1,0 +1,331 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Remy Davenport — Founder Story (CTA)</title>
+<style>
+<!--FONTS-->
+:root{
+  --ink:#0A0A0B; --bone:#F4F1EA; --mut:#8C857A; --dim:#5C574E;
+  --amber:#D4A24E; --amber2:#E8C079; --glow:rgba(212,162,78,.55);
+  --line:rgba(244,241,234,.12); --line2:rgba(244,241,234,.06);
+  --sans:'Inter',-apple-system,system-ui,sans-serif;
+  --serif:'Fraunces',ui-serif,Georgia,serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--ink);
+  color:var(--bone);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision}
+
+/* ---------- persistent background ---------- */
+#bg{position:absolute;inset:0;background:var(--ink);z-index:0}
+#glowA,#glowB{position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity}
+#glowA{width:1500px;height:1500px;left:-260px;top:-340px;
+  background:radial-gradient(circle at 50% 50%,rgba(212,162,78,.20),rgba(212,162,78,.05) 42%,transparent 66%)}
+#glowB{width:1240px;height:1240px;right:-360px;bottom:-380px;
+  background:radial-gradient(circle at 50% 50%,rgba(233,192,107,.14),rgba(212,162,78,.04) 46%,transparent 68%)}
+#grain{position:absolute;inset:-120px;opacity:.06;mix-blend-mode:overlay;pointer-events:none;will-change:transform;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 90% at 50% 46%,transparent 52%,rgba(0,0,0,.55) 100%)}
+
+/* ---------- persistent wordmark ---------- */
+#mark{position:absolute;top:236px;left:0;right:0;z-index:5;display:flex;flex-direction:column;align-items:center;gap:16px}
+#mark .name{font-family:var(--mono);font-size:23px;letter-spacing:.52em;text-transform:uppercase;
+  color:var(--amber2);padding-left:.52em}
+#mark .rule{width:54px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+
+/* ---------- frame band (story-safe) ---------- */
+#band{position:absolute;left:0;right:0;top:250px;bottom:316px;z-index:4;
+  display:block;padding:0 80px}
+.frame{position:absolute;inset:0;padding:0;display:none;flex-direction:column;
+  align-items:flex-start;justify-content:center;will-change:transform,opacity}
+.frame.on{display:flex}
+
+.eye{font-family:var(--mono);font-size:25px;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--amber);font-weight:500;margin-bottom:40px;display:flex;align-items:center;gap:18px}
+.eye .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 14px var(--glow)}
+
+h1{font-family:var(--sans);font-weight:800;line-height:1.05;letter-spacing:-.035em;font-size:90px;color:var(--bone)}
+h1 .ln{display:block}
+.am{color:var(--amber)}
+.sub{font-family:var(--sans);font-weight:450;font-size:42px;line-height:1.32;color:var(--mut);
+  margin-top:46px;max-width:840px}
+.sub b{color:var(--bone);font-weight:600}
+em.it{font-style:italic;font-family:var(--serif);font-weight:500}
+
+/* F1 stacked lines */
+.stak .ln{display:block;font-family:var(--sans);font-weight:800;font-size:114px;line-height:1.08;
+  letter-spacing:-.035em;color:var(--bone)}
+.stak .ln .num{color:var(--amber)}
+
+/* F3 cost verbs */
+.beat{font-family:var(--sans);font-weight:700;font-size:56px;line-height:1.2;color:var(--mut);margin-top:34px}
+.beat .v{color:var(--amber2)}
+
+/* F5 pillars */
+.pillars{display:flex;gap:18px;margin-top:50px;flex-wrap:wrap}
+.pchip{font-family:var(--mono);font-size:28px;letter-spacing:.06em;color:var(--bone);
+  border:1px solid var(--line);border-radius:999px;padding:18px 30px;background:rgba(244,241,234,.03);
+  display:flex;align-items:center;gap:14px}
+.pchip .t{width:7px;height:7px;border-radius:50%;background:var(--amber)}
+
+/* F6 relief lines */
+.relief{display:flex;flex-direction:column;gap:30px}
+.relief .rl{display:flex;align-items:center;gap:32px;font-family:var(--sans);font-weight:800;
+  font-size:98px;letter-spacing:-.03em;color:var(--bone)}
+.relief .rl .ck{flex:0 0 auto;width:56px;height:56px;border-radius:50%;border:2px solid var(--amber);
+  display:grid;place-items:center;color:var(--amber);font-size:30px;font-weight:700}
+
+/* ---------- F7 CTA ---------- */
+.cta{position:absolute;inset:0;padding:0 80px 326px;display:none;flex-direction:column;
+  align-items:center;justify-content:flex-end;text-align:center;will-change:transform,opacity}
+.cta.on{display:flex}
+.cta .eye{justify-content:center;margin-bottom:34px}
+.cta .lead{font-family:var(--sans);font-weight:600;font-size:58px;letter-spacing:-.01em;color:var(--bone)}
+.cta .lead .small{display:block;font-weight:500;font-size:40px;color:var(--mut);margin-bottom:18px;letter-spacing:0}
+#pill{margin-top:30px;font-family:var(--sans);font-weight:800;font-size:128px;letter-spacing:.02em;
+  color:var(--ink);background:linear-gradient(180deg,var(--amber2),var(--amber));
+  padding:30px 64px 38px;border-radius:28px;line-height:1;
+  box-shadow:0 0 0 rgba(212,162,78,.0)}
+.arrows{margin-top:54px;width:150px;height:240px;position:relative}
+.arrows svg{width:100%;height:100%;overflow:visible}
+.chev{fill:none;stroke:var(--amber);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 10px var(--glow))}
+.reply{margin-top:30px;font-family:var(--mono);font-size:30px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--amber2);display:flex;align-items:center;gap:14px}
+.reply .em{font-size:38px}
+</style></head>
+<body><div id="stage">
+
+  <div id="bg"></div>
+  <div id="glowA"></div>
+  <div id="glowB"></div>
+  <div id="grain"></div>
+
+  <div id="mark"><span class="name">REMY DAVENPORT</span><span class="rule"></span></div>
+
+  <div id="band">
+
+    <!-- F1 HOOK -->
+    <section class="frame" data-f="0">
+      <div class="eye"><span class="dot"></span>Sound familiar?</div>
+      <div class="stak">
+        <span class="ln" data-c>Media guy <span class="num">#1.</span></span>
+        <span class="ln" data-c>Then <span class="num">#2.</span></span>
+        <span class="ln" data-c>Then <span class="num">#3.</span></span>
+      </div>
+    </section>
+
+    <!-- F2 STRUGGLE -->
+    <section class="frame" data-f="1">
+      <div class="eye"><span class="dot"></span>The treadmill</div>
+      <h1 data-c><span class="ln">A whole year</span><span class="ln">building a media</span><span class="ln">team in-house.</span></h1>
+      <p class="sub" data-c>And still — <b>no end in sight.</b></p>
+    </section>
+
+    <!-- F3 COST -->
+    <section class="frame" data-f="2">
+      <div class="eye"><span class="dot"></span>What it costs you</div>
+      <h1 data-c><span class="ln">Every new hire,</span><span class="ln">the brand</span><span class="ln"><span class="am">starts over.</span></span></h1>
+      <div class="beat" data-c>Voice <span class="v">resets.</span> Momentum <span class="v">dies.</span></div>
+    </section>
+
+    <!-- F4 THE TURN -->
+    <section class="frame" data-f="3">
+      <div class="eye"><span class="dot"></span>Deep down</div>
+      <h1 data-c><span class="ln">You <em class="it am">already know</em></span><span class="ln">the fix.</span></h1>
+      <p class="sub" data-c>And it <b>isn't</b> another hire.</p>
+    </section>
+
+    <!-- F5 THE ANSWER -->
+    <section class="frame" data-f="4">
+      <div class="eye"><span class="dot"></span>The answer</div>
+      <h1 data-c><span class="ln">One specialized</span><span class="ln">team that <span class="am">owns it.</span></span></h1>
+      <div class="pillars">
+        <span class="pchip" data-p><span class="t"></span>Strategy</span>
+        <span class="pchip" data-p><span class="t"></span>Production</span>
+        <span class="pchip" data-p><span class="t"></span>Posting</span>
+      </div>
+    </section>
+
+    <!-- F6 RELIEF -->
+    <section class="frame" data-f="5">
+      <div class="eye"><span class="dot"></span>What changes</div>
+      <div class="relief">
+        <div class="rl" data-r><span class="ck">✓</span>Off your plate.</div>
+        <div class="rl" data-r><span class="ck">✓</span>On brand.</div>
+        <div class="rl" data-r><span class="ck">✓</span>Always on.</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- F7 CTA (own layer so arrows can reach toward the reply bar) -->
+  <section class="cta" data-f="6">
+    <div class="eye"><span class="dot"></span>Your next move</div>
+    <div class="lead" id="cta-lead"><span class="small">If that's you — DM us the word</span></div>
+    <div id="pill">FOUNDER</div>
+    <div class="arrows"><svg viewBox="0 0 150 240" preserveAspectRatio="xMidYMid meet">
+      <path class="chev" data-ch d="M20 20 L75 70 L130 20"/>
+      <path class="chev" data-ch d="M20 95 L75 145 L130 95"/>
+      <path class="chev" data-ch d="M20 170 L75 220 L130 170"/>
+    </svg></div>
+    <div class="reply" id="cta-reply">Reply to this story <span class="em">👇</span></div>
+  </section>
+
+  <div id="vignette"></div>
+</div>
+
+<script>
+/* ============ pure-function-of-t timeline (no CSS transitions, no rAF) ============ */
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const seg=(t,a,b)=>clamp((t-a)/(b-a),0,1);
+const lerp=(a,b,x)=>a+(b-a)*x;
+const eOutCubic=x=>1-Math.pow(1-x,3);
+const eOutQuint=x=>1-Math.pow(1-x,5);
+const eInCubic=x=>x*x*x;
+const eOutExpo=x=>x>=1?1:1-Math.pow(2,-10*x);
+const eInOutCubic=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eOutBack=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const TAU=Math.PI*2;
+
+const TOTAL=18.6;                 // seconds of motion (freeze appended in ffmpeg)
+window.__slides=[{id:'founder-story',dur:TOTAL}];
+
+/* frame presence windows in SECONDS: [inA,inB,outA,outB]  (F7 has no exit) */
+const WIN=[
+  [0.20,1.15, 2.40,3.05],   // F1
+  [2.50,3.55, 4.95,5.55],   // F2
+  [5.00,6.05, 7.45,8.05],   // F3
+  [7.50,8.55, 9.95,10.55],  // F4
+  [10.00,11.10, 12.55,13.15],// F5
+  [12.60,13.65, 14.75,15.35],// F6
+  [14.95,16.25, 99,99],     // F7 (stays; settles, then loops)
+];
+
+const frames=[...document.querySelectorAll('.frame'),document.querySelector('.cta')];
+
+/* child reveal: mask-wipe + rise + micro-scale, all eased */
+function reveal(el,p,dy=34){
+  if(!el)return; const e=eOutQuint(p), o=eOutCubic(p);
+  el.style.opacity=o.toFixed(4);
+  el.style.transform=`translateY(${lerp(dy,0,e).toFixed(2)}px) scale(${lerp(.97,1,e).toFixed(4)})`;
+  el.style.clipPath=`inset(0 0 ${((1-e)*102).toFixed(1)}% 0)`;
+}
+function fadeRise(el,p,dy=26){ if(!el)return; const e=eOutExpo(p);
+  el.style.opacity=eOutCubic(p).toFixed(4); el.style.transform=`translateY(${lerp(dy,0,e).toFixed(2)}px)`; }
+
+/* group exit envelope for a frame container */
+function envelope(el,sec,w){
+  const enter=seg(sec,w[0],w[1]);
+  const exit=seg(sec,w[2],w[3]);
+  const vis=sec>=w[0]-0.25 && sec<=w[3]+0.25;   // run inner choreography only near the window
+  el.classList.add('on');                        // ALWAYS in render tree — no display:none flip (avoids capture paint race)
+  const ex=eInCubic(exit);
+  el.style.opacity=(vis?(1-ex):0).toFixed(4);    // cull outside the window via opacity, not display
+  el.style.transform=`translateY(${lerp(0,-62,ex).toFixed(2)}px)`;
+  return {enter,exit,vis};
+}
+
+/* ---- per-frame inner choreography (staggered children) ---- */
+const ANIM=[
+  // F1 — three lines drop in with rhythm
+  (s,sec,w)=>{ const ls=[...s.querySelectorAll('[data-c]')];
+    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.10+k*0.20, w[0]+0.10+k*0.20+0.62), 40));
+    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
+  },
+  // F2 — headline lines wipe, sub rises
+  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
+    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
+    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.18+k*0.16, w[0]+0.18+k*0.16+0.66), 38));
+    fadeRise(s.querySelector('.sub'), seg(sec, w[0]+0.78, w[0]+1.25), 22);
+  },
+  // F3 — cost: headline then verbs punch
+  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
+    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
+    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.16+k*0.18, w[0]+0.16+k*0.18+0.66), 38));
+    fadeRise(s.querySelector('.beat'), seg(sec, w[0]+0.82, w[0]+1.28), 20);
+  },
+  // F4 — the turn (serif emphasis)
+  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
+    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
+    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.20+k*0.22, w[0]+0.20+k*0.22+0.7), 40));
+    fadeRise(s.querySelector('.sub'), seg(sec, w[0]+0.92, w[0]+1.4), 22);
+  },
+  // F5 — answer + pillar chips pop staggered
+  (s,sec,w)=>{ const ls=[...s.querySelectorAll('h1 .ln')];
+    reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
+    ls.forEach((l,k)=>reveal(l, seg(sec, w[0]+0.16+k*0.18, w[0]+0.16+k*0.18+0.66), 38));
+    [...s.querySelectorAll('[data-p]')].forEach((c,k)=>{
+      const p=eOutBack(seg(sec, w[0]+0.78+k*0.14, w[0]+1.18+k*0.14));
+      c.style.opacity=clamp(p,0,1).toFixed(3);
+      c.style.transform=`translateY(${lerp(24,0,clamp(p,0,1)).toFixed(2)}px) scale(${lerp(.9,1,clamp(p,0,1)).toFixed(3)})`;
+    });
+  },
+  // F6 — relief lines + check marks land
+  (s,sec,w)=>{ reveal(s.querySelector('.eye'), seg(sec,w[0],w[0]+0.5),18);
+    [...s.querySelectorAll('[data-r]')].forEach((l,k)=>{
+      const a=w[0]+0.18+k*0.30;
+      reveal(l, seg(sec, a, a+0.64), 36);
+      const ck=l.querySelector('.ck'); const cp=eOutBack(seg(sec, a+0.18, a+0.66));
+      ck.style.transform=`scale(${lerp(.4,1,clamp(cp,0,1)).toFixed(3)})`; ck.style.opacity=clamp(cp,0,1).toFixed(3);
+    });
+  },
+  // F7 — CTA: eyebrow, lead, pill pop, arrows draw, reply; then loop glow+march
+  (s,sec,w)=>{
+    reveal(s.querySelector('.eye'), seg(sec, w[0], w[0]+0.5),18);
+    fadeRise(s.querySelector('.lead'), seg(sec, w[0]+0.25, w[0]+0.8),22);
+    const pill=s.querySelector('#pill'); const pp=eOutBack(seg(sec, w[0]+0.5, w[0]+1.15));
+    pill.style.opacity=clamp(pp,0,1).toFixed(3);
+    pill.style.transform=`scale(${lerp(.78,1,clamp(pp,0,1)).toFixed(4)})`;
+    // continuous glow pulse (text stays full opacity — freeze-safe)
+    const settled=seg(sec, w[0]+0.5, w[0]+1.15);
+    const pulse=(Math.sin(sec*TAU/2.2)*0.5+0.5);
+    const gl=lerp(14,46,pulse)*settled;
+    pill.style.boxShadow=`0 0 ${gl.toFixed(0)}px ${(gl*0.9).toFixed(0)}px rgba(212,162,78,${(0.18+0.16*pulse).toFixed(3)})`;
+    // arrows: draw in staggered, then a downward travelling highlight + gentle bob
+    const chevs=[...s.querySelectorAll('[data-ch]')];
+    chevs.forEach((c,k)=>{
+      const dl=eOutCubic(seg(sec, w[0]+0.85+k*0.13, w[0]+1.25+k*0.13));
+      const L=c.getTotalLength(); c.style.strokeDasharray=L;
+      c.style.strokeDashoffset=(L*(1-dl)).toFixed(1);
+      // travelling brightness wave down the stack (loops)
+      const phase=(sec*1.05 - k*0.32)%1.6/1.6;
+      const wave=Math.max(0,Math.cos((phase-0.5)*Math.PI));
+      c.style.opacity=(clamp(dl,0,1)*lerp(0.5,1,wave)).toFixed(3);
+      c.style.strokeWidth=lerp(11,15,wave).toFixed(1);
+    });
+    const arr=s.querySelector('.arrows');
+    arr.style.transform=`translateY(${(Math.sin(sec*TAU/1.9)*7).toFixed(2)}px)`;
+    fadeRise(s.querySelector('.reply'), seg(sec, w[0]+1.05, w[0]+1.6),18);
+  },
+];
+
+/* ---------- persistent background drift (continuous, never resets) ---------- */
+function bg(sec){
+  const ph=sec/TOTAL;
+  const gA=document.getElementById('glowA'), gB=document.getElementById('glowB'),
+        gr=document.getElementById('grain');
+  gA.style.transform=`translate(${(Math.sin(sec*0.21)*70).toFixed(1)}px,${(Math.cos(sec*0.17)*54).toFixed(1)}px) scale(${(1+0.06*Math.sin(sec*0.23)).toFixed(4)})`;
+  gA.style.opacity=(0.85+0.15*Math.sin(sec*0.3)).toFixed(3);
+  gB.style.transform=`translate(${(Math.cos(sec*0.19)*-80).toFixed(1)}px,${(Math.sin(sec*0.15)*60).toFixed(1)}px) scale(${(1+0.07*Math.cos(sec*0.2)).toFixed(4)})`;
+  gB.style.opacity=(0.8+0.2*Math.cos(sec*0.26)).toFixed(3);
+  gr.style.transform=`translate(${(Math.sin(sec*0.7)*8).toFixed(1)}px,${(Math.cos(sec*0.5)*8).toFixed(1)}px)`;
+  // wordmark quiet fade-in then hold
+  document.getElementById('mark').style.opacity=(seg(sec,0.1,0.7)*1).toFixed(3);
+}
+
+window.__seekSlide=function(i,t){
+  const sec=clamp(t,0,1)*TOTAL;
+  bg(sec);
+  for(let f=0;f<frames.length;f++){
+    const el=frames[f], w=WIN[f];
+    const env=envelope(el,sec,w);
+    if(env.vis) ANIM[f](el,sec,w);
+  }
+};
+
+function boot(){ window.__seekSlide(0,0); window.__ready=true; }
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(boot);setTimeout(boot,1500);}else boot();
+</script>
+</body></html>
