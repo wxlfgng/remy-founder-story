@@ -3,15 +3,16 @@
 <style>
 <!--FONTS-->
 :root{
-  --ink:#0A0A0B; --bone:#F4F1EA; --mut:#8C857A; --dim:#5C574E;
-  --amber:#D4A24E; --amber2:#E8C079; --glow:rgba(212,162,78,.55);
-  --line:rgba(244,241,234,.12); --line2:rgba(244,241,234,.06);
+  /* WHITE + PURPLE palette. --amber/--amber2 kept as var names = the purple accent. */
+  --ink:#FFFFFF; --bone:#16122A; --mut:#6B6480; --dim:#A8A1BA;
+  --amber:#7C3AED; --amber2:#9B6BF2; --glow:rgba(124,58,237,.42);
+  --line:rgba(22,18,42,.14); --line2:rgba(22,18,42,.06);
   --sans:'Inter',-apple-system,system-ui,sans-serif;
   --serif:'Fraunces',ui-serif,Georgia,serif;
   --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#000}
+html,body{background:#FFFFFF}
 #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--ink);
   color:var(--bone);font-family:var(--sans);-webkit-font-smoothing:antialiased;
   text-rendering:geometricPrecision}
@@ -20,13 +21,13 @@ html,body{background:#000}
 #bg{position:absolute;inset:0;background:var(--ink);z-index:0}
 #glowA,#glowB{position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity}
 #glowA{width:1500px;height:1500px;left:-260px;top:-340px;
-  background:radial-gradient(circle at 50% 50%,rgba(212,162,78,.20),rgba(212,162,78,.05) 42%,transparent 66%)}
+  background:radial-gradient(circle at 50% 50%,rgba(124,58,237,.16),rgba(124,58,237,.05) 42%,transparent 66%)}
 #glowB{width:1240px;height:1240px;right:-360px;bottom:-380px;
-  background:radial-gradient(circle at 50% 50%,rgba(233,192,107,.14),rgba(212,162,78,.04) 46%,transparent 68%)}
-#grain{position:absolute;inset:-120px;opacity:.06;mix-blend-mode:overlay;pointer-events:none;will-change:transform;
+  background:radial-gradient(circle at 50% 50%,rgba(155,107,242,.13),rgba(124,58,237,.04) 46%,transparent 68%)}
+#grain{position:absolute;inset:-120px;opacity:.03;mix-blend-mode:multiply;pointer-events:none;will-change:transform;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
 #vignette{position:absolute;inset:0;pointer-events:none;z-index:2;
-  background:radial-gradient(120% 90% at 50% 46%,transparent 52%,rgba(0,0,0,.55) 100%)}
+  background:radial-gradient(120% 92% at 50% 44%,transparent 62%,rgba(108,70,190,.06) 100%)}
 
 /* ---------- persistent wordmark ---------- */
 #mark{position:absolute;top:236px;left:0;right:0;z-index:5;display:flex;flex-direction:column;align-items:center;gap:16px}
@@ -65,7 +66,7 @@ em.it{font-style:italic;font-family:var(--serif);font-weight:500}
 /* F5 pillars */
 .pillars{display:flex;gap:18px;margin-top:50px;flex-wrap:wrap}
 .pchip{font-family:var(--mono);font-size:28px;letter-spacing:.06em;color:var(--bone);
-  border:1px solid var(--line);border-radius:999px;padding:18px 30px;background:rgba(244,241,234,.03);
+  border:1px solid var(--line);border-radius:999px;padding:18px 30px;background:rgba(124,58,237,.05);
   display:flex;align-items:center;gap:14px}
 .pchip .t{width:7px;height:7px;border-radius:50%;background:var(--amber)}
 
@@ -283,7 +284,7 @@ const ANIM=[
     const settled=seg(sec, w[0]+0.5, w[0]+1.15);
     const pulse=(Math.sin(sec*TAU/2.2)*0.5+0.5);
     const gl=lerp(14,46,pulse)*settled;
-    pill.style.boxShadow=`0 0 ${gl.toFixed(0)}px ${(gl*0.9).toFixed(0)}px rgba(212,162,78,${(0.18+0.16*pulse).toFixed(3)})`;
+    pill.style.boxShadow=`0 0 ${gl.toFixed(0)}px ${(gl*0.9).toFixed(0)}px rgba(124,58,237,${(0.22+0.18*pulse).toFixed(3)})`;
     // arrows: draw in staggered, then a downward travelling highlight + gentle bob
     const chevs=[...s.querySelectorAll('[data-ch]')];
     chevs.forEach((c,k)=>{
